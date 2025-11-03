@@ -1,0 +1,27 @@
+{
+  "header": {
+    "tabs": [
+      { "key": "home", "label": "首页" },
+      { "key": "posts", "label": "文章" },
+      { "key": "categories", "label": "分类" },
+      { "key": "tags", "label": "标签" },
+      { "key": "about", "label": "关于" }
+    ],
+    "title": "博客小鼠"
+  },
+  "home": {
+    "welcome": "欢迎来到博客小鼠",
+    "description": "一个简洁优雅的博客平台"
+  },
+  "about": {
+    "title": "关于我们",
+    "description": "这是关于我们页面的内容。",
+    "developing": "关于我们页面正在开发中..."
+  },
+  "languages": {
+    "en": "English",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}

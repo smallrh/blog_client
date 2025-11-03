@@ -1,0 +1,27 @@
+{
+  "header": {
+    "tabs": [
+      { "key": "home", "label": "홈" },
+      { "key": "posts", "label": "게시물" },
+      { "key": "categories", "label": "카테고리" },
+      { "key": "tags", "label": "태그" },
+      { "key": "about", "label": "소개" }
+    ],
+    "title": "블로그 마우스"
+  },
+  "home": {
+    "welcome": "블로그 마우스에 오신 것을 환영합니다",
+    "description": "단순하고 우아한 블로그 플랫폼"
+  },
+  "about": {
+    "title": "회사 소개",
+    "description": "이것은 회사 소개 페이지의 내용입니다.",
+    "developing": "회사 소개 페이지는 개발 중입니다..."
+  },
+  "languages": {
+    "en": "English",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}

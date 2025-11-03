@@ -1,0 +1,100 @@
+.home-container {
+  min-height: 100vh;
+  padding-top: 80px; // 为fixed header留出空间
+}
+
+.main-content {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-section {
+  padding: 40px;
+  border-radius: 16px;
+  border: 1px solid;
+
+  &.dark-mode {
+    background-color: rgba(30, 36, 44, 0.5);
+    border-color: rgba(95, 158, 160, 0.3);
+  }
+
+  &.light-mode {
+    background-color: #ffffff;
+    border-color: #e1e4e8;
+  }
+}
+
+.welcome-title {
+  color: #00bcd4;
+  font-size: 48px;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+
+.description-box {
+  padding: 25px;
+  border-radius: 12px;
+  margin: 30px 0;
+  border-left: 4px solid #00bcd4;
+
+  &.dark-mode {
+    background-color: rgba(48, 54, 61, 0.5);
+  }
+
+  &.light-mode {
+    background-color: #f6f8fa;
+  }
+}
+
+.description-text {
+  font-size: 18px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.button-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.primary-button {
+  background-color: #00bcd4;
+  color: white;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+}
+
+.secondary-button {
+  background-color: transparent;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &.dark-mode {
+    color: #00bcd4;
+    border-color: #00bcd4;
+
+    &:hover {
+      background-color: rgba(0, 188, 212, 0.1);
+    }
+  }
+
+  &.light-mode {
+    color: #0d6efd;
+    border-color: #0d6efd;
+
+    &:hover {
+      background-color: rgba(13, 110, 253, 0.05);
+    }
+  }
+}
