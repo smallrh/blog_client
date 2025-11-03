@@ -1,0 +1,28 @@
+{
+  "header": {
+      "tabs": [
+        { "key": "home", "label": "ホーム" },
+        { "key": "posts", "label": "投稿" },
+        { "key": "categories", "label": "カテゴリー" },
+        { "key": "tags", "label": "タグ" },
+        { "key": "about", "label": "概要" }
+      ],
+      "title": "ブログマウス",
+      "loginRegister": "ログイン/登録"
+    },
+  "home": {
+    "welcome": "ブログマウスへようこそ",
+    "description": "シンプルでエレガントなブログプラットフォーム"
+  },
+  "about": {
+    "title": "会社概要",
+    "description": "これは会社概要ページの内容です。",
+    "developing": "会社概要ページは開発中です..."
+  },
+  "languages": {
+    "en": "English",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어"
+  }
+}

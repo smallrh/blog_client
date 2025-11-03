@@ -1,0 +1,131 @@
+/* 应用容器基础样式 */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 深色主题样式 */
+.dark-mode {
+  background-color: #0d1117;
+  color: #c9d1d9;
+}
+
+/* 浅色主题样式 */
+.light-mode {
+  background-color: #ffffff;
+  color: #24292e;
+}
+
+/* 全局滚动条样式 - 深色模式 */
+.dark-mode ::-webkit-scrollbar-track {
+  background: rgba(95, 158, 160, 0.1);
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: rgba(95, 158, 160, 0.5);
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 188, 212, 0.8);
+}
+
+/* 全局滚动条样式 - 浅色模式 */
+.light-mode ::-webkit-scrollbar-track {
+  background: rgba(33, 150, 243, 0.1);
+}
+
+.light-mode ::-webkit-scrollbar-thumb {
+  background: rgba(33, 150, 243, 0.5);
+}
+
+.light-mode ::-webkit-scrollbar-thumb:hover {
+  background: rgba(33, 150, 243, 0.8);
+}
+
+/* 全局滚动条基础样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+/* 确保主题切换时文本和边框颜色也相应变化 */
+.light-mode h1, 
+.light-mode h2, 
+.light-mode h3, 
+.light-mode h4, 
+.light-mode h5, 
+.light-mode h6 {
+  color: #24292e;
+}
+
+.dark-mode h1, 
+.dark-mode h2, 
+.dark-mode h3, 
+.dark-mode h4, 
+.dark-mode h5, 
+.dark-mode h6 {
+  color: #c9d1d9;
+}
+
+/* 确保按钮等交互元素在不同主题下有合适的对比度 */
+.light-mode button {
+  color: #24292e;
+}
+
+.dark-mode button {
+  color: #c9d1d9;
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}

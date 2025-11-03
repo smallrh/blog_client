@@ -1,0 +1,28 @@
+{
+  "header": {
+    "tabs": [
+      { "key": "home", "label": "Home" },
+      { "key": "posts", "label": "Posts" },
+      { "key": "categories", "label": "Categories" },
+      { "key": "tags", "label": "Tags" },
+      { "key": "about", "label": "About" }
+    ],
+    "title": "Blog Mice",
+    "loginRegister": "sign in / sign up"
+  },
+  "home": {
+    "welcome": "Welcome to Blog Mice",
+    "description": "A simple and elegant blog platform"
+  },
+  "about": {
+    "title": "About Us",
+    "description": "This is the content of the About Us page.",
+    "developing": "The About Us page is under development..."
+  },
+  "languages": {
+     "en": "English",
+     "zh": "中文",
+     "ja": "日本語",
+     "ko": "한국어"
+    }
+}

@@ -1,0 +1,415 @@
+
+# 前端开发规范 (React)
+
+## 🚫 禁止事项
+- **不修改CSS文件**：不要修改任何CSS样式文件
+- **不修改HTML结构**：不要修改HTML布局和结构
+- **不主动测试后端接口**：后端接口默认已启动，访问不了时提示用户
+- **不生成测试代码**：测试代码单独处理
+- **不随意添加新接口调用**：需有明确需求
+
+## 🏗️ 项目结构规范
+```
+blog-frontend/
+├── public/
+├── scripts/
+│   └── sql/
+│       └── run_sql.sh           # 插入 global_snippets 脚本
+├── src/
+│   ├── app/
+│   │   ├── router/
+│   │   │   ├── pc-routes.tsx
+│   │   │   ├── mobile-routes.tsx
+│   │   │   └── index.tsx        # 根据 /pc 或 /m 前缀挂载对应 Router
+│   │   ├── providers.tsx       # 全局 Provider（i18n、Theme、Store等）
+│   │   └── index.tsx           # 应用入口（挂载 /pc 与 /m 子应用）
+│   │
+│   ├── components/              # 组件目录：彻底分离 PC 与 Mobile
+│   │   ├── pc/                  # PC 专用组件（Button、Header...）
+│   │   └── mobile/              # Mobile 专用组件（Button、Header...）
+│   │
+│   ├── pages/
+│   │   ├── pc/                  # PC 页面（每个页面单独目录）
+│   │   │   ├── AboutUs/
+│   │   │   │   └── index.tsx
+│   │   │   └── Home/
+│   │   │       └── index.tsx
+│   │   └── mobile/
+│   │       ├── AboutUs/
+│   │       │   └── index.tsx
+│   │       └── Home/
+│   │           └── index.tsx
+│   │
+│   ├── services/
+│   │   └── apiClient.js         # === 你的 API 客户端入口（必须）
+│   │
+│   ├── constants/
+│   │   └── index.ts
+│   │
+│   ├── utils/
+│   │   └── parseSnippetContent.js
+│   │
+│   ├── hooks/
+│   │   └── useActivityDesk.ts   # ActivityDesk 相关 Hook（可选）
+│   │
+│   ├── store/
+│   └── types/
+└── vite.config.ts
+
+
+
+## ⚙️ 技术规范
+基本约定
+
+开发端口：5173（前端 dev server）
+
+vite 已配置代理到后端 http://localhost:5000（不要修改 vite.config.ts）。
+
+后端入口（global snippets）：http://localhost:5173/api/global-snippets?language=en-US
+
+实际请求通过 src/services/apiClient.js 发出（请按示例实现）。
+
+默认支持语言：en-US（英语），zh-CN（中文），ja-JP（日文），ko-KR（韩语）。后端需插入 4 条对应语言的数据。
+
+Key 命名规则：页面名 大写 作为 Key，例如 ABOUT_US；全局应用 key 使用 'blog'（若需要 app 区分，可在接口参数传入 app=blog）。
+
+内容格式：global_snippets 的 content 字段 必须是有效 JSON 字符串，解析后为页面 info 对象（见下面示例）。
+
+组件通信：数据从 ActivityDesk 传递给 Widget（直接 props 传参或通过专用 Context，不允许全局 window 变量传递）。
+
+API 调用位置：所有 API 调用统一在 src/services/apiClient.js（或同目录下的分文件）定义，并由页面或 ActivityDesk 调用。
+
+### 全局配置数据使用
+global_snippets / 多语言 / 内容结构（约定）
+接口（前端调用）
+GET /api/global-snippets?language={lang}&key={PAGE_KEY}&app=blog
+
+
+language：如 en-US、zh-CN 等（必传，默认 en-US）
+
+key：页面key（如 ABOUT_US）; 可选，若不传返回全部
+
+app：默认为 blog
+
+返回示例（后端需保证此结构）
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "list": [
+      {
+        "id": 123,
+        "key": "ABOUT_US",
+        "language": "en-US",
+        "content": "{\"title\":\"About us\",\"intro\":\"This is our blog.\",\"widgets\":[{\"type\":\"hero\",\"props\":{...}}]}"
+      }
+    ]
+  }
+}
+
+content 说明（约定）
+
+content 为 JSON 字符串，解出后为对象，例如：
+
+{
+  "title": "About us",
+  "intro": "This is our blog.",
+  "widgets": [
+    { "type": "Hero", "props": { "image": "/img/hero.jpg", "cta": "Read more" } },
+    { "type": "ArticleList", "props": { "category": "news", "limit": 10 } }
+  ]
+}
+
+
+widgets 数组用于 ActivityDesk 渲染具体 Widgets（ActivityDesk → Widget）。
+
+多语言策略（你选 A：全部走后端）
+
+对于每个页面（Key），后端必须插入 4 条记录（en-US, zh-CN, ja-JP, ko-KR）。
+
+前端只需要传 language 参数，后端返回对应语言那一条。
+
+## 🔄 开发流程
+页面配置开发流程（前端与后端协同）
+
+数据插入（后端/DB）
+
+使用 scripts/sql/run_sql.sh 插入 global_snippets。脚本接收参数：key language content app。
+
+content 必须为 合法 JSON 字符串（例如使用 jq 或后端进行转义）。
+
+数据验证（开发人员/验收）
+
+curl "http://localhost:5173/api/global-snippets?language=en-US&key=ABOUT_US&app=blog"
+
+验证 content 字段能被 JSON.parse 正常解析，且包含 widgets 等约定字段。
+
+前端调用（页面/ActivityDesk）
+
+使用 src/services/apiClient.js 中的 getGlobalSnippets(language, key) 接口获取数据。
+
+数据传递（ActivityDesk → Widget）
+
+ActivityDesk 负责解析 content 并根据 widgets 数组按顺序渲染对应 Widget 组件，数据通过 props 传递。
+
+本地测试
+
+在 http://localhost:5173/pc/about 或 http://localhost:5173/m/about 访问对应端页面进行联调。
+
+### 组件开发流程
+组件定义
+
+PC 专用组件放 src/components/pc/*，Mobile 放 src/components/mobile/*。组件命名首字母大写且目录与文件一一对应。
+
+API 在 src/services 定义
+
+只在 services 内调用网络 API，页面仅通过 service 层拿数据（避免在组件内部散乱调用）。
+
+状态管理
+
+使用 React Hooks（局部）或 store/（跨页面）统一管理。避免组件间使用全局 window state。
+
+数据渲染
+
+Widget 从 props 接收数据，所有 Widget 必须实现 props.schema 校验（建议使用 prop-types 或 TS 类型）。
+
+## 📝 示例代码
+
+### 前端服务示例
+```javascript
+// src/services/apiClient.js
+export const getGlobalSnippets = (language = 'en-US') => {
+  return apiClient.get('/api/global-snippets', { params: { language } });
+};
+```
+
+### 组件使用示例
+```javascript
+// src/pages/AboutUs.jsx
+import { getGlobalSnippets } from '../services/apiClient';
+
+const AboutUs = () => {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    getGlobalSnippets('en-US').then(response => {
+      setData(response.data.list[0].content);
+    });
+  }, []);
+
+  return (
+    <div>
+      <h1>{data?.title}</h1>
+      <p>{data?.intro}</p>
+    </div>
+  );
+};
+```
+🧩 示例代码（最小可用示例）
+src/services/apiClient.js
+// src/services/apiClient.js
+import axios from 'axios';
+
+const apiClient = axios.create({
+  baseURL: '/', // Vite dev server 代理到后端（5000），不要修改 vite.config.ts
+  timeout: 10000,
+});
+
+// 获取 global snippets（单条或多条）
+export const getGlobalSnippets = (language = 'en-US', key = '', app = 'blog') => {
+  const params = { language, app };
+  if (key) params.key = key;
+  return apiClient.get('/api/global-snippets', { params });
+};
+
+// 导出客户实例以便其他 service 使用
+export default apiClient;
+
+utils: 解析 snippet content（解析字符串为对象并校验）
+// src/utils/parseSnippetContent.js
+export const parseSnippetContent = (rawContent) => {
+  if (!rawContent) return null;
+  try {
+    const obj = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent;
+    return obj;
+  } catch (err) {
+    console.error('parseSnippetContent: content is not valid JSON', err);
+    return null;
+  }
+};
+
+ActivityDesk（解析并渲染 widget 列表）
+// src/pages/pc/AboutUs/index.tsx  （PC 端示例）
+import React, { useEffect, useState } from 'react';
+import { getGlobalSnippets } from '../../../services/apiClient';
+import { parseSnippetContent } from '../../../utils/parseSnippetContent';
+import HeroWidget from '../../../components/pc/Hero';
+import ArticleListWidget from '../../../components/pc/ArticleList';
+
+const widgetMap = {
+  Hero: HeroWidget,
+  ArticleList: ArticleListWidget,
+};
+
+const ActivityDesk = ({ language = 'en-US' }) => {
+  const [content, setContent] = useState(null);
+
+  useEffect(() => {
+    getGlobalSnippets(language, 'ABOUT_US', 'blog').then(res => {
+      const list = res?.data?.data?.list;
+      if (list && list.length) {
+        const parsed = parseSnippetContent(list[0].content);
+        setContent(parsed);
+      }
+    }).catch(err => {
+      console.error(err);
+      // 按你的规则：如果后端接口报错，向用户提示“后端报错”，而不是前端尝试修复
+      alert('后端接口报错，请联系后端（错误已记录）');
+    });
+  }, [language]);
+
+  if (!content) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <h1>{content.title}</h1>
+      <p>{content.intro}</p>
+
+      {/* ActivityDesk 根据 widgets 数组渲染 */}
+      {Array.isArray(content.widgets) && content.widgets.map((w, i) => {
+        const Widget = widgetMap[w.type];
+        if (!Widget) return null;
+        return <Widget key={i} {...w.props} />;
+      })}
+    </div>
+  );
+};
+
+export default ActivityDesk;
+
+Mobile 对应页面（路径 src/pages/mobile/AboutUs/index.tsx）
+// src/pages/mobile/AboutUs/index.tsx
+import React, { useEffect, useState } from 'react';
+import { getGlobalSnippets } from '../../../services/apiClient';
+import { parseSnippetContent } from '../../../utils/parseSnippetContent';
+import HeroWidget from '../../../components/mobile/Hero';
+import ArticleListWidget from '../../../components/mobile/ArticleList';
+
+const widgetMap = {
+  Hero: HeroWidget,
+  ArticleList: ArticleListWidget,
+};
+
+const MobileActivityDesk = ({ language = 'en-US' }) => {
+  const [content, setContent] = useState(null);
+
+  useEffect(() => {
+    getGlobalSnippets(language, 'ABOUT_US', 'blog').then(res => {
+      const list = res?.data?.data?.list;
+      if (list && list.length) {
+        const parsed = parseSnippetContent(list[0].content);
+        setContent(parsed);
+      }
+    }).catch(err => {
+      console.error(err);
+      alert('后端接口报错，请联系后端（错误已记录）');
+    });
+  }, [language]);
+
+  if (!content) return <div>Loading...</div>;
+
+  return (
+    <div style={{ padding: 12 }}>
+      <h2>{content.title}</h2>
+      <p>{content.intro}</p>
+
+      {Array.isArray(content.widgets) && content.widgets.map((w, i) => {
+        const Widget = widgetMap[w.type];
+        if (!Widget) return null;
+        return <Widget key={i} {...w.props} />;
+      })}
+    </div>
+  );
+};
+
+export default MobileActivityDesk;
+
+示例 Widget（PC / Mobile 完全分离）
+// src/components/pc/Hero/index.tsx
+const Hero = ({ image, cta }) => (
+  <div className="pc-hero">
+    <img src={image} alt="" />
+    <button>{cta}</button>
+  </div>
+);
+export default Hero;
+
+// src/components/mobile/Hero/index.tsx
+const Hero = ({ image, cta }) => (
+  <div className="mobile-hero">
+    <img src={image} alt="" style={{ width: '100%' }} />
+    <button style={{ padding: 8 }}>{cta}</button>
+  </div>
+);
+export default Hero;
+
+🛠 SQL 插入脚本示例（scripts/sql/run_sql.sh）
+#!/usr/bin/env bash
+# usage: ./run_sql.sh KEY LANGUAGE CONTENT APP
+KEY=$1
+LANG=$2
+CONTENT=$3
+APP=${4:-blog}
+
+# 这里假设你有 mysql CLI 可用，并且环境变量已配置
+# 注意：CONTENT 需进行适当转义或通过文件传入
+mysql -h127.0.0.1 -P3306 -uuser -ppassword blog_db <<EOF
+INSERT INTO global_snippets (\`key\`, language, content, app) VALUES ("${KEY}", "${LANG}", '${CONTENT}', "${APP}");
+EOF
+
+
+提示：真正插入时，建议把 CONTENT 写入文件并用 LOAD_FILE 或后端 API 批量写入，避免命令行转义错误。
+
+✅ 开发/联调验收清单（Checklist）
+
+ 确认 vite.config.ts 已设置代理到 http://localhost:5000（不要修改）
+
+ 后端已插入 global_snippets：对于每个页面 Key 存在 4 条不同 language 数据
+
+ content 字段是合法 JSON（能被 JSON.parse）
+
+ 前端通过 src/services/apiClient.js 能拿到数据（示例页面能渲染）
+
+ ActivityDesk 能正确将 widgets 映射到对应端的 Widget 组件
+
+ 所有 PC 组件都在 src/components/pc，Mobile 在 src/components/mobile（完全分离）
+
+ 在接口报错时，前端显示「后端接口报错，请联系后端（错误已记录）」（按你原规则：不要尝试修复）
+
+🚨 注意事项（重要）
+
+后端接口报错：前端只提示用户「后端接口报错」，并记录错误；不要在前端做修复尝试或隐式降级内容。
+
+不要启动后端：默认后端已启动；如接口访问不了，请提示用户（或开发者）检查后端，不要在前端修改代理。
+
+不要修改 vite.config.ts：代理已做好，前端勿擅自改动（以免 CI/CD 与本地不一致）。
+
+content 必须有效 JSON：若后端插入了非 JSON 字符串，会导致渲染失败，前端只提示错误信息。
+
+组件完全分离：PC 与 Mobile 不共享 UI 组件文件（仅逻辑可复用 Hook/Service）。
+
+路由明确：以 /pc/* 与 /m/* 为入口（便于 SEO/统计/独立部署策略）。
+
+🔧 小贴士（提高效率）
+
+推荐把 getGlobalSnippets 做缓存（memory 或 localStorage）以减少重复请求（特别是同一页面多次渲染场景）。
+
+后端返回 widgets 时可以加 schemaVersion 字段，前端按版本路由到不同解析器，便于兼容升级。
+
+对 Widget props 做严格类型校验（TS + runtime check），避免 content 数据不合规导致崩溃。
+
+## ⚠️ 注意事项
+- **后端接口报错**：提示用户后端直接报错，不要尝试修复
+- **不要启动后端**：后端默认已启动，接口访问不了时提示用户
+- **不要修改vite.config.ts**：代理配置已设置，不要修改
+- **不要修改已经完善的样式**
