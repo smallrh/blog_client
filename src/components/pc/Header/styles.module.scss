@@ -152,6 +152,7 @@
 .controlsSection {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
   gap: 12px;
   gap: 20px;
 }
@@ -233,6 +234,11 @@
   border-radius: 50%;
 }
 
+=======
+  gap: 20px;
+}
+
+>>>>>>> e804e7cb10e25652d7d409891df7d503c651e38c
 // 主题切换按钮
 .themeSwitch {
   font-size: 17px;

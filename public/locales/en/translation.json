@@ -20,9 +20,10 @@
     "developing": "The About Us page is under development..."
   },
   "languages": {
+<<<<<<< HEAD
      "en": "English",
      "zh": "中文",
-     "ja": "日本語",
-     "ko": "한국어"
+    "ja": "日本語",
+    "ko": "한국어"
     }
 }
