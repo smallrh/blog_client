@@ -14,6 +14,8 @@ const Auth: React.FC = () => {
   // 当前页面暂时不使用翻译功能
   const navigate = useNavigate()
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [targetTheme, setTargetTheme] = useState<"dark" | "light" | null>(null)
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -122,40 +124,35 @@ const Auth: React.FC = () => {
     // 可以添加注册的逻辑或导航
   }
 
-  const themeClass = isDarkMode ? "dark-mode" : "light-mode"
-
-  // 处理主题切换时的动画效果
   const handleThemeToggle = () => {
-    // 获取主题切换按钮元素
-    const themeButton = document.querySelector(`.${styles["theme-toggle-button"]}`)
-    if (themeButton) {
-      // 添加点击类以触发圆形扩散动画
-      themeButton.classList.add("clicked")
+    // 计算目标主题
+    const newTheme = isDarkMode ? "light" : "dark"
 
-      // 更新主题
-      const newTheme = !isDarkMode
-      document.documentElement.classList.toggle("dark-mode", newTheme)
-      document.documentElement.classList.toggle("light-mode", !newTheme)
-      localStorage.setItem("theme", newTheme ? "dark" : "light")
-      setIsDarkMode(newTheme)
+    // 立即设置目标主题和动画状态
+    setTargetTheme(newTheme)
+    setIsAnimating(true)
 
-      const themeProvider = document.getElementById("theme-provider")
-      if (themeProvider) {
-        themeProvider.setAttribute("data-theme", newTheme ? "dark" : "light")
-      }
+    // 在扩散动画进行到一半时切换实际背景
+    setTimeout(() => {
+      setIsDarkMode(newTheme === "dark")
+      localStorage.setItem("theme", newTheme)
+    }, 400)
 
-      window.dispatchEvent(new CustomEvent("themeChanged", { detail: { theme: newTheme ? "dark" : "light" } }))
-
-      // 动画结束后移除clicked类
-      setTimeout(() => {
-        themeButton.classList.remove("clicked")
-      }, 600)
-    }
+    // 动画结束后重置状态
+    setTimeout(() => {
+      setIsAnimating(false)
+      setTargetTheme(null)
+    }, 1000)
   }
+
+  const themeClass = isDarkMode ? styles["dark-mode"] : styles["light-mode"]
+  const overlayClass = targetTheme === "dark" ? styles["to-dark"] : targetTheme === "light" ? styles["to-light"] : ""
 
   return (
     <div className={`${styles["auth-container"]} ${themeClass}`}>
-      {/* 主题切换按钮 - 屏幕左下角 */}
+      <div className={`${styles["theme-transition-overlay"]} ${isAnimating ? styles["active"] : ""} ${overlayClass}`} />
+
+      {/* 主题切换按钮 - 屏幕右下角 */}
       <button
         className={styles["theme-toggle-button"]}
         onClick={handleThemeToggle}

@@ -10,9 +10,51 @@
   background: linear-gradient(135deg, #f0f4ff, #e6f7ff);
   font-family: 'monospace';
   position: relative;
-  transition: background 0.5s ease;
+  transition: background 0.3s ease;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+/* 深色模式样式 - 作为 auth-container 的修饰类 */
+.auth-container.dark-mode {
+  background: linear-gradient(135deg, #1a202c, #2d3748);
+}
+
+.auth-container.dark-mode .theme-toggle-button {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.auth-container.dark-mode .auth-card {
+  background: #1e293b;
+  box-shadow: 20px 20px 40px #151f2e, -20px -20px 40px #27354a;
+}
+
+.auth-container.dark-mode .user-icon-circle {
+  background: #1e293b;
+  box-shadow: inset 8px 8px 16px #151f2e, inset -8px -8px 16px #27354a;
+}
+
+.auth-container.dark-mode .user-icon {
+  color: #e2e8f0;
+}
+
+.auth-container.dark-mode .form-input {
+  background: #1e293b;
+  color: #e2e8f0;
+  box-shadow: inset 5px 5px 10px #151f2e, inset -5px -5px 10px #27354a;
+}
+
+.auth-container.dark-mode .form-input::placeholder {
+  color: #94a3b8;
+}
+
+.auth-container.dark-mode .form-input:focus {
+  box-shadow: inset 4px 4px 8px #151f2e, inset -4px -4px 8px #27354a;
+}
+
+.auth-container.dark-mode .footer-link {
+  color: #94a3b8;
 }
 
 /* 卡片容器 */
@@ -24,6 +66,8 @@
   padding: 32px;
   box-shadow: 20px 20px 40px #d1d9e6, -20px -20px 40px #ffffff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative; /* 添加相对定位 */
+  z-index: 10; /* 确保表单在扩散层之上 */
 }
 
 /* 卡片悬停效果 */
@@ -99,12 +143,12 @@
   transform: translateY(1px);
 }
 
-/* 主题切换按钮 - 左下角位置，而不是右上角 */
+/* 主题切换按钮 - 右下角位置 */
 .theme-toggle-button {
   position: fixed;
   bottom: 20px;
-  left: 20px;
-  z-index: 1000;
+  right: 20px;
+  z-index: 100; /* 提高 z-index,确保按钮在所有内容之上 */
   background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 50%;
@@ -117,7 +161,10 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+}
+
+.theme-toggle-button.clicked::before {
+  background: rgba(240, 244, 255, 0.95) !important;
 }
 
 .theme-toggle-button:hover {
@@ -129,25 +176,53 @@
   transform: scale(0.95);
 }
 
-/* 圆形扩散动画效果 - 从左下角开始扩散 */
-.theme-toggle-button::before {
+/* 圆形扩散动画效果 - 从右下角开始扩散 */
+/* 降低 z-index,让扩散层在背景之上但在表单之下 */
+.theme-transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1; /* 降低到 1,在背景之上但在表单(z-index: 10)之下 */
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.theme-transition-overlay::before {
   content: '';
-  position: absolute;
+  position: fixed;
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0);
-  bottom: 0;
-  left: 0;
-  transform: translate(0, 0);
-  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease;
-  z-index: -1;
+  bottom: 45px;
+  right: 45px;
+  transform: translate(50%, 50%);
+  transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  opacity: 0;
 }
 
-.theme-toggle-button.clicked::before {
-  width: 800px;
-  height: 800px;
-  background: rgba(0, 0, 0, 0.8);
+/* 从浅色切换到深色 */
+.theme-transition-overlay.to-dark::before {
+  background: linear-gradient(135deg, #1a202c, #2d3748); /* 切换到深色时,扩散层显示深色 */
+}
+
+/* 从深色切换到浅色 */
+.theme-transition-overlay.to-light::before {
+  background: linear-gradient(135deg, #f0f4ff, #e6f7ff); /* 切换到浅色时,扩散层显示浅色 */
+}
+
+/* 激活扩散动画 */
+.theme-transition-overlay.active {
+  opacity: 1;
+}
+
+.theme-transition-overlay.active::before {
+  width: 300vmax;
+  height: 300vmax;
+  opacity: 1;
 }
 
 /* 密码切换按钮 */
@@ -291,57 +366,6 @@
   border: 1px solid #ef4444;
 }
 
-/* 深色模式支持 - 优化背景和过渡效果 */
-.dark-mode {
-  background: linear-gradient(135deg, #1a202c, #2d3748);
-  transition: background 0.5s ease;
-  margin: 0;
-  padding: 0;
-}
-
-/* 深色模式下的圆形扩散动画 */
-.dark-mode .theme-toggle-button.clicked::before {
-  background: rgba(255, 255, 255, 0.8) !important;
-}
-
-/* 深色模式下的主题按钮样式 */
-.dark-mode .theme-toggle-button {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.dark-mode .auth-card {
-  background: #1e293b;
-  box-shadow: 20px 20px 40px #151f2e, -20px -20px 40px #27354a;
-}
-
-.dark-mode .user-icon-circle {
-  background: #1e293b;
-  box-shadow: inset 8px 8px 16px #151f2e, inset -8px -8px 16px #27354a;
-}
-
-.dark-mode .user-icon {
-  color: #e2e8f0;
-}
-
-.dark-mode .form-input {
-  background: #1e293b;
-  color: #e2e8f0;
-  box-shadow: inset 5px 5px 10px #151f2e, inset -5px -5px 10px #27354a;
-}
-
-.dark-mode .form-input::placeholder {
-  color: #94a3b8;
-}
-
-.dark-mode .form-input:focus {
-  box-shadow: inset 4px 4px 8px #151f2e, inset -4px -4px 8px #27354a;
-}
-
-.dark-mode .footer-link {
-  color: #94a3b8;
-}
-
 /* 响应式设计 */
 @media (max-width: 480px) {
   .auth-card {
@@ -350,7 +374,7 @@
     box-shadow: 15px 15px 30px #d1d9e6, -15px -15px 30px #ffffff;
   }
   
-  .dark-mode .auth-card {
+  .auth-container.dark-mode .auth-card {
     box-shadow: 15px 15px 30px #151f2e, -15px -15px 30px #27354a;
   }
   
