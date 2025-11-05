@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import router from './app/router/pc-routes';
 import Providers from './app/providers';
+import ErrorBoundary from './components/pc/ErrorBoundary';
 import './App.css';
 
 function App() {
@@ -62,11 +63,14 @@ function App() {
 
   return (
     <div className={`app-container ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-      {/* 使用Providers组件包裹，确保i18n正确初始化 */}
-      <Providers>
-        {/* 路由提供器 */}
-        <RouterProvider router={router} />
-      </Providers>
+      {/* 使用ErrorBoundary包裹整个应用，捕获全局错误 */}
+      <ErrorBoundary>
+        {/* 使用Providers组件包裹，确保i18n正确初始化 */}
+        <Providers>
+          {/* 路由提供器 */}
+          <RouterProvider router={router} />
+        </Providers>
+      </ErrorBoundary>
       
       {/* 主题状态全局标识元素 */}
       <div 

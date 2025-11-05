@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: '/', // Vite dev server 代理到后端（5000），不要修改 vite.config.ts
+  baseURL: 'http://localhost:9000', // 后端端口是localhost:9000
   timeout: 10000,
 });
 

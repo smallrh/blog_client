@@ -2,33 +2,32 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { login } from "../../../services/auth"
-import type { LoginParams } from "../../../types/user"
+import { useNavigate, useParams } from "react-router-dom"
+import { sendVerificationCode } from "../../../services/auth"
+import type { SendCodeParams } from "../../../types/user"
 import styles from "./styles.module.scss"
 
 interface FormData {
   email: string
-  password: string
 }
 
-const Auth: React.FC = () => {
-  // 当前页面暂时不使用翻译功能
+const ForgetPass: React.FC = () => {
   const navigate = useNavigate()
+  const params = useParams<{ lang: string }>()
+  const currentLang = params.lang || 'en'
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
   const [targetTheme, setTargetTheme] = useState<"dark" | "light" | null>(null)
   const [formData, setFormData] = useState<FormData>({
     email: "",
-    password: "",
   })
   const [errors, setErrors] = useState<Partial<FormData>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   // 获取当前主题
   useEffect(() => {
-    const currentTheme =
+    const currentTheme = 
       localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
     setIsDarkMode(currentTheme === "dark")
 
@@ -79,12 +78,6 @@ const Auth: React.FC = () => {
       newErrors.email = "Invalid email format"
     }
 
-    if (!formData.password) {
-      newErrors.password = "Password is required"
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
-    }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -100,42 +93,37 @@ const Auth: React.FC = () => {
     setIsSubmitting(true)
 
     try {
-      // 调用登录接口
-      const loginParams: LoginParams = {
-        account: formData.email, // 使用email作为account
-        password: formData.password
+      // 调用发送验证码接口
+      const sendCodeParams: SendCodeParams = {
+        email: formData.email,
+        type: 'reset_password'
       }
-      
-      const response = await login(loginParams)
+
+      const response = await sendVerificationCode(sendCodeParams)
       
       if (response.code === 200) {
-        console.log("登录成功", response.data)
-        // 登录成功后重定向到首页
-        navigate("/")
+        console.log("密码重置验证码已发送到", formData.email)
+        setSuccessMessage("Password reset instructions have been sent to your email.")
+        
+        // 5秒后返回登录页面
+        setTimeout(() => {
+          navigate(`/${currentLang}/auth/login`)
+        }, 5000)
       } else {
         // 显示错误信息
-        setErrors({ password: response.message || "登录失败，请检查账号和密码" })
+        setErrors({ email: response.message || "发送密码重置邮件失败" })
       }
     } catch (error) {
-      console.error("登录失败", error)
-      setErrors({ password: "后端接口报错，请稍后重试" })
+      console.error("发送密码重置邮件失败", error)
+      setErrors({ email: "后端接口报错，请稍后重试" })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // 处理忘记密码
-  const handleForgotPassword = () => {
-    console.log("Forgot password clicked")
-    // 使用导航跳转到忘记密码页面
-    navigate("/auth/forgot-password")
-  }
-
-  // 处理注册
-  const handleRegister = () => {
-    console.log("Register clicked")
-    // 使用导航跳转到注册页面
-    navigate("/auth/register")
+  // 返回登录页面
+  const handleBackToLogin = () => {
+    navigate(`/${currentLang}/auth/login`)
   }
 
   const handleThemeToggle = () => {
@@ -181,7 +169,7 @@ const Auth: React.FC = () => {
       </button>
 
       <div className={styles["auth-card"]}>
-        {/* 用户图标 */}
+        {/* 用户图标 - 修改为邮箱图标 */}
         <div className={styles["user-icon-container"]}>
           <div className={styles["user-icon-circle"]}>
             <svg
@@ -196,82 +184,51 @@ const Auth: React.FC = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
             </svg>
           </div>
         </div>
 
+        {/* 成功消息 */}
+        {successMessage && (
+          <div className={styles["success-message"]}>
+            {successMessage}
+          </div>
+        )}
+
         {/* 表单 */}
-        <form onSubmit={handleSubmit} className={styles["auth-form"]}>
-          {/* 邮箱输入框 */}
-          <div className={styles["input-container"]}>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`${styles["form-input"]} ${errors.email ? styles["error"] : ""}`}
-              placeholder="Email"
-            />
-            {errors.email && <span className={styles["error-message"]}>{errors.email}</span>}
-          </div>
+        {!successMessage && (
+          <form onSubmit={handleSubmit} className={styles["auth-form"]}>
+            <div className={styles["form-description"]}>
+              Enter your email address and we'll send you instructions to reset your password.
+            </div>
 
-          {/* 密码输入框 */}
-          <div className={styles["input-container"]}>
-            <input
-              type={showPassword ? "text" : "password"}
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className={`${styles["form-input"]} ${errors.password ? styles["error"] : ""}`}
-              placeholder="Password"
-            />
-            <button
-              type="button"
-              className={styles["toggle-password"]}
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={styles["password-icon"]}
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
+            {/* 邮箱输入框 */}
+            <div className={styles["input-container"]}>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`${styles["form-input"]} ${errors.email ? styles["error"] : ""}`}
+                placeholder="Email"
+              />
+              {errors.email && <span className={styles["error-message"]}>{errors.email}</span>}
+            </div>
+
+            {/* 提交按钮 */}
+            <button type="submit" className={styles["submit-button"]} disabled={isSubmitting}>
+              {isSubmitting ? <div className={styles["loader"]}></div> : "Send Reset Link"}
             </button>
-            {errors.password && <span className={styles["error-message"]}>{errors.password}</span>}
-          </div>
-
-          {/* 提交按钮 */}
-          <button type="submit" className={styles["submit-button"]} disabled={isSubmitting}>
-            {isSubmitting ? <div className={styles["loader"]}></div> : "Login"}
-          </button>
-        </form>
+          </form>
+        )}
 
         {/* 底部链接 */}
         <div className={styles["auth-footer"]}>
-          <button type="button" className={styles["footer-link"]} onClick={handleForgotPassword}>
-            Forgot password?
-          </button>
-          <button
-            type="button"
-            className={styles["footer-link"]}
-            onClick={handleRegister}
-            style={{ marginLeft: "5px" }}
-          >
-            or Sign up
+          <button type="button" className={styles["footer-link"]} onClick={handleBackToLogin}>
+            Back to Login
           </button>
         </div>
       </div>
@@ -279,4 +236,4 @@ const Auth: React.FC = () => {
   )
 }
 
-export default Auth
+export default ForgetPass

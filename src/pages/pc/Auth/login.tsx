@@ -2,19 +2,21 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
+import styles from "./styles.module.scss"
 import { login } from "../../../services/auth"
 import type { LoginParams } from "../../../types/user"
-import styles from "./styles.module.scss"
 
 interface FormData {
   email: string
   password: string
 }
 
-const Auth: React.FC = () => {
+const Login: React.FC = () => {
   // 当前页面暂时不使用翻译功能
   const navigate = useNavigate()
+  const params = useParams<{ lang: string }>()
+  const currentLang = params.lang || 'en'
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
   const [targetTheme, setTargetTheme] = useState<"dark" | "light" | null>(null)
@@ -28,7 +30,7 @@ const Auth: React.FC = () => {
 
   // 获取当前主题
   useEffect(() => {
-    const currentTheme =
+    const currentTheme = 
       localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
     setIsDarkMode(currentTheme === "dark")
 
@@ -100,25 +102,27 @@ const Auth: React.FC = () => {
     setIsSubmitting(true)
 
     try {
-      // 调用登录接口
+      // 构造登录参数
       const loginParams: LoginParams = {
-        account: formData.email, // 使用email作为account
+        account: formData.email,
         password: formData.password
       }
-      
+
+      // 调用登录接口
       const response = await login(loginParams)
-      
+
       if (response.code === 200) {
-        console.log("登录成功", response.data)
+        console.log("Login successful", formData)
         // 登录成功后重定向到首页
-        navigate("/")
+        navigate(`/${currentLang}`)
       } else {
-        // 显示错误信息
-        setErrors({ password: response.message || "登录失败，请检查账号和密码" })
+        // 处理登录失败
+        console.error("Login failed", response.message)
+        setErrors({ email: response.message || "Login failed" })
       }
     } catch (error) {
-      console.error("登录失败", error)
-      setErrors({ password: "后端接口报错，请稍后重试" })
+      console.error("Login failed", error)
+      setErrors({ email: "An error occurred during login" })
     } finally {
       setIsSubmitting(false)
     }
@@ -126,16 +130,12 @@ const Auth: React.FC = () => {
 
   // 处理忘记密码
   const handleForgotPassword = () => {
-    console.log("Forgot password clicked")
-    // 使用导航跳转到忘记密码页面
-    navigate("/auth/forgot-password")
+    navigate(`/${currentLang}/auth/forget_pass`)
   }
 
   // 处理注册
   const handleRegister = () => {
-    console.log("Register clicked")
-    // 使用导航跳转到注册页面
-    navigate("/auth/register")
+    navigate(`/${currentLang}/auth/sign_up`)
   }
 
   const handleThemeToggle = () => {
@@ -279,4 +279,4 @@ const Auth: React.FC = () => {
   )
 }
 
-export default Auth
+export default Login

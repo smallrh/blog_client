@@ -15,6 +15,38 @@
   overflow: hidden;
 }
 
+/* 表单描述样式 */
+.form-description {
+  margin-bottom: 24px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 深色模式下的表单描述 */
+.auth-container.dark-mode .form-description {
+  color: #94a3b8;
+}
+
+/* 成功消息样式 */
+.success-message {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(74, 222, 128, 0.1);
+  border-radius: 12px;
+  color: #16a34a;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 深色模式下的成功消息 */
+.auth-container.dark-mode .success-message {
+  background: rgba(74, 222, 128, 0.05);
+  color: #4ade80;
+}
+
 /* 深色模式样式 - 作为 auth-container 的修饰类 */
 .auth-container.dark-mode {
   background: linear-gradient(135deg, #1a202c, #2d3748);
@@ -167,13 +199,27 @@
   background: rgba(240, 244, 255, 0.95) !important;
 }
 
-.theme-toggle-button:hover {
+.theme-toggle-button:hover:not(:disabled) {
   transform: scale(1.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-.theme-toggle-button:active {
+.theme-toggle-button:active:not(:disabled) {
   transform: scale(0.95);
+}
+
+/* 禁用状态的主题切换按钮 */
+.theme-toggle-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: scale(1);
+  box-shadow: none;
+  transition: opacity 0.3s ease;
+}
+
+/* 深色模式下禁用状态的主题切换按钮 */
+.dark-mode .theme-toggle-button:disabled {
+  opacity: 0.5;
 }
 
 /* 圆形扩散动画效果 - 从右下角开始扩散 */
