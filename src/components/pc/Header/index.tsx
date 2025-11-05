@@ -236,7 +236,6 @@ const Header: React.FC<HeaderProps> = ({
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowLanguageMenu(false);
-<<<<<<< HEAD
                         
                       // 切换语言并更新URL，确保URL中包含语言参数
                       // 这样刷新页面后语言设置不会丢失
@@ -254,15 +253,6 @@ const Header: React.FC<HeaderProps> = ({
                       
                       // 同时更新i18n的语言设置
                       i18n.changeLanguage(lang.code).catch(err => {
-=======
-                       
-                      // 直接使用i18n.changeLanguage方法切换语言
-                      // 这样可以避免页面重新加载，实现平滑的语言切换
-                      i18n.changeLanguage(lang.code).then(() => {
-                        // 语言切换成功后，如果需要可以执行其他操作
-                        console.log('语言已切换为:', lang.code);
-                      }).catch(err => {
->>>>>>> e804e7cb10e25652d7d409891df7d503c651e38c
                         console.error('语言切换失败:', err);
                       });
                     }}
