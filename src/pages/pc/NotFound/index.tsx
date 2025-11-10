@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTheme } from '../../../hooks/useTheme';
 import './styles.module.scss';
 
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
   const params = useParams<{ lang?: string }>();
   const currentLang = params.lang || 'zh';
+  useTheme();
 
   const handleGoBack = () => {
     if (window.history.length > 1) {

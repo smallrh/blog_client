@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTheme } from '../../../hooks/useTheme';
 import './styles.module.scss';
 
 const Error: React.FC = () => {
   const navigate = useNavigate();
   const params = useParams<{ lang?: string }>();
   const currentLang = params.lang || 'zh';
+  useTheme();
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; size: number; opacity: number; speed: number; color: string }>>([]);
   const [isRetrying, setIsRetrying] = useState(false);
   const [glowIntensity, setGlowIntensity] = useState(1);

@@ -5,6 +5,7 @@ import AboutUs from '../../pages/pc/AboutUs';
 import Login from '../../pages/pc/Auth/login';
 import ForgetPass from '../../pages/pc/Auth/forget_pass';
 import SignUp from '../../pages/pc/Auth/sign_up';
+import ResetPassword from '../../pages/pc/Auth/reset_password';
 import NotFound from '../../pages/pc/NotFound';
 import Error from '../../pages/pc/Error';
 import i18n from '../i18n';
@@ -42,15 +43,22 @@ const LanguageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) 
   const lang = params.lang;
 
   useEffect(() => {
-    // 如果URL中有语言参数且是支持的语言，更新i18n的当前语言
+    // 确保URL中的语言参数被正确应用到i18n
     if (lang && ['zh', 'en', 'ja', 'ko'].includes(lang)) {
-      i18n.changeLanguage(lang);
+      // 强制重新加载翻译资源
+      i18n.loadNamespaces(['translation']).then(() => {
+        // 清除可能导致缓存的localStorage项
+        localStorage.removeItem('i18nextLng');
+        // 显式设置语言并触发资源重新加载
+        i18n.changeLanguage(lang).then(() => {
+          console.log('语言切换成功:', lang);
+        }).catch(err => {
+          console.error('语言切换失败:', err);
+        });
+      });
     } else if (!lang) {
-      // 如果没有语言参数，使用当前已设置的语言或默认语言
-      const currentLang = i18n.language;
-      if (!['zh', 'en', 'ja', 'ko'].includes(currentLang)) {
-        i18n.changeLanguage('zh');
-      }
+      // 如果没有语言参数，使用默认语言
+      i18n.changeLanguage('zh');
     }
   }, [lang]);
 
@@ -99,9 +107,11 @@ const routes = [
     path: '/:lang/auth/forget_pass',
     element: <LanguageRoute><ForgetPass /></LanguageRoute>,
   },
-  {
-    path: '/:lang/auth/sign_up',
+  { path: '/:lang/auth/sign_up',
     element: <LanguageRoute><SignUp /></LanguageRoute>,
+  },
+  { path: '/:lang/auth/reset_password',
+    element: <LanguageRoute><ResetPassword /></LanguageRoute>,
   },
   {
     path: '/:lang/pc/auth',
@@ -117,6 +127,9 @@ const routes = [
   },
   { path: '/:lang/pc/auth/sign_up',
     element: <LanguageRoute><SignUp /></LanguageRoute>,
+  },
+  { path: '/:lang/pc/auth/reset_password',
+    element: <LanguageRoute><ResetPassword /></LanguageRoute>,
   },
   { path: '/pc/auth',
     element: <LanguageRedirector />, // 不带语言参数的auth路径重定向

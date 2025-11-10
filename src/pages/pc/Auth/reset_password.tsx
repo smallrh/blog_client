@@ -2,27 +2,31 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import styles from "./styles.module.scss"
-import { login } from "../../../services/auth"
-import type { LoginParams } from "../../../types/request/login"
+import { resetPassword } from "../../../services/auth"
+import type { ResetPasswordParams } from "../../../types/request/resetPassword"
 
 interface FormData {
   email: string
-  password: string
+  verify_code: string
+  new_password: string
+  confirm_password: string
 }
 
-const Login: React.FC = () => {
-  // 当前页面暂时不使用翻译功能
+const ResetPassword: React.FC = () => {
   const navigate = useNavigate()
   const params = useParams<{ lang: string }>()
+  const [searchParams] = useSearchParams()
   const currentLang = params.lang || 'en'
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
   const [targetTheme, setTargetTheme] = useState<"dark" | "light" | null>(null)
   const [formData, setFormData] = useState<FormData>({
     email: "",
-    password: "",
+    verify_code: "",
+    new_password: "",
+    confirm_password: ""
   })
   const [errors, setErrors] = useState<Partial<FormData>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -53,6 +57,19 @@ const Login: React.FC = () => {
     }
   }, [])
 
+  // 从URL查询参数中读取邮箱并填充到表单
+  useEffect(() => {
+    const emailParam = searchParams.get('email')
+    if (emailParam) {
+      setFormData(prev => ({
+        ...prev,
+        email: decodeURIComponent(emailParam)
+      }))
+    }
+  }, [searchParams])
+
+
+
   // 表单输入处理
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -75,23 +92,29 @@ const Login: React.FC = () => {
   const validateForm = () => {
     const newErrors: Partial<FormData> = {}
 
-    if (!formData.email) {
-      newErrors.email = "Email is required"
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email format"
+    if (!formData.verify_code) {
+      newErrors.verify_code = "Verification code is required"
+    } else if (formData.verify_code.length !== 6 || !/^\d+$/.test(formData.verify_code)) {
+      newErrors.verify_code = "Verification code must be 6 digits"
     }
 
-    if (!formData.password) {
-      newErrors.password = "Password is required"
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
+    if (!formData.new_password) {
+      newErrors.new_password = "New password is required"
+    } else if (formData.new_password.length < 6) {
+      newErrors.new_password = "Password must be at least 6 characters"
+    }
+
+    if (formData.new_password !== formData.confirm_password) {
+      newErrors.confirm_password = "Passwords do not match"
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  // 表单提交处理
+
+
+  // 表单提交处理 - 重置密码
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -102,40 +125,36 @@ const Login: React.FC = () => {
     setIsSubmitting(true)
 
     try {
-      // 构造登录参数
-      const loginParams: LoginParams = {
-        account: formData.email,
-        password: formData.password
+      // 构造重置密码参数
+      const resetPasswordParams: ResetPasswordParams = {
+        email: formData.email,
+        verify_code: formData.verify_code,
+        new_password: formData.new_password
       }
 
-      // 调用登录接口
-      const response = await login(loginParams)
+      // 调用重置密码接口
+      const response = await resetPassword(resetPasswordParams)
 
       if (response.code === 200) {
-        console.log("Login successful", formData)
-        // 登录成功后重定向到首页
-        navigate(`/${currentLang}`)
+        console.log("Password reset successfully")
+        // 重置成功后跳转到登录页面
+        // alert("Password reset successfully! Please login with your new password.")
+        navigate(`/${currentLang}/auth/login`)
       } else {
-        // 处理登录失败
-        console.error("Login failed", response.message)
-        setErrors({ email: response.message || "Login failed" })
+        console.error("Password reset failed", response.message)
+        setErrors({ verify_code: response.message || "Password reset failed" })
       }
     } catch (error) {
-      console.error("Login failed", error)
-      setErrors({ email: "An error occurred during login" })
+      console.error("Password reset failed", error)
+      setErrors({ verify_code: "An error occurred during password reset" })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // 处理忘记密码
-  const handleForgotPassword = () => {
-    navigate(`/${currentLang}/auth/forget_pass`)
-  }
-
-  // 处理注册
-  const handleRegister = () => {
-    navigate(`/${currentLang}/auth/sign_up`)
+  // 返回登录页面
+  const handleBackToLogin = () => {
+    navigate(`/${currentLang}/auth/login`)
   }
 
   const handleThemeToggle = () => {
@@ -196,82 +215,99 @@ const Login: React.FC = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
+              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
             </svg>
           </div>
         </div>
 
-        {/* 表单 */}
-        <form onSubmit={handleSubmit} className={styles["auth-form"]}>
-          {/* 邮箱输入框 */}
-          <div className={styles["input-container"]}>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`${styles["form-input"]} ${errors.email ? styles["error"] : ""}`}
-              placeholder="Email"
-            />
-            {errors.email && <span className={styles["error-message"]}>{errors.email}</span>}
+        <h2 className={styles["form-title"]}>Reset Password</h2>
+        <p className={styles["form-description"]}>
+            Please enter the verification code sent to your email and your new password.
+          </p>
+
+          {/* 显示邮箱地址 */}
+          <div className={styles["email-display"]}>
+            <span>Verification code sent to: </span>
+            <strong>{formData.email}</strong>
           </div>
 
-          {/* 密码输入框 */}
+        {/* 表单 */}
+        <form onSubmit={handleSubmit} className={styles["auth-form"]}>
+          {/* 验证码输入框 */}
+          <div className={styles["input-container"]}>
+            <input
+              type="text"
+              id="verify_code"
+              name="verify_code"
+              value={formData.verify_code}
+              onChange={handleInputChange}
+              placeholder="Verification Code"
+              className={`${styles["form-input"]} ${errors.verify_code ? styles["form-input-error"] : ""}`}
+              maxLength={6}
+            />
+            {errors.verify_code && (
+              <p className={styles["error-message"]}>{errors.verify_code}</p>
+            )}
+          </div>
+
+          {/* 新密码输入框 */}
           <div className={styles["input-container"]}>
             <input
               type={showPassword ? "text" : "password"}
-              id="password"
-              name="password"
-              value={formData.password}
+              id="new_password"
+              name="new_password"
+              value={formData.new_password}
               onChange={handleInputChange}
-              className={`${styles["form-input"]} ${errors.password ? styles["error"] : ""}`}
-              placeholder="Password"
+              placeholder="New Password"
+              className={`${styles["form-input"]} ${errors.new_password ? styles["form-input-error"] : ""}`}
             />
             <button
               type="button"
-              className={styles["toggle-password"]}
               onClick={() => setShowPassword(!showPassword)}
+              className={styles["toggle-password"]}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={styles["password-icon"]}
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
+              {showPassword ? "👁️" : "👁️‍🗨️"}
             </button>
-            {errors.password && <span className={styles["error-message"]}>{errors.password}</span>}
+            {errors.new_password && (
+              <p className={styles["error-message"]}>{errors.new_password}</p>
+            )}
+          </div>
+
+          {/* 确认新密码输入框 */}
+          <div className={styles["input-container"]}>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="confirm_password"
+              name="confirm_password"
+              value={formData.confirm_password}
+              onChange={handleInputChange}
+              placeholder="Confirm New Password"
+              className={`${styles["form-input"]} ${errors.confirm_password ? styles["form-input-error"] : ""}`}
+            />
+            {errors.confirm_password && (
+              <p className={styles["error-message"]}>{errors.confirm_password}</p>
+            )}
           </div>
 
           {/* 提交按钮 */}
-          <button type="submit" className={styles["submit-button"]} disabled={isSubmitting}>
-            {isSubmitting ? <div className={styles["loader"]}></div> : "Login"}
+          <button
+            type="submit"
+            className={`${styles["submit-button"]} ${isSubmitting ? styles["submit-button-disabled"] : ""}`}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Resetting..." : "Reset Password"}
           </button>
         </form>
 
-        {/* 底部链接 */}
-        <div className={styles["auth-footer"]}>
-          <button type="button" className={styles["footer-link"]} onClick={handleForgotPassword}>
-            Forgot password?
-          </button>
+        {/* 返回登录 */}
+        <div className={styles["footer-links"]}>
           <button
             type="button"
+            onClick={handleBackToLogin}
             className={styles["footer-link"]}
-            onClick={handleRegister}
-            style={{ marginLeft: "5px" }}
           >
-            or Sign up
+            Back to Login
           </button>
         </div>
       </div>
@@ -279,4 +315,4 @@ const Login: React.FC = () => {
   )
 }
 
-export default Login
+export default ResetPassword

@@ -2,22 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useLogin } from '../../../hooks/useLogin';
+import { useTheme } from '../../../hooks/useTheme';
 import styles from './styles.module.scss';
 
 export interface HeaderProps {
   title?: string;
   logo?: string;
-  onThemeToggle?: () => void;
-  isDarkMode?: boolean;
   onLanguageChange?: (lang: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
   // title = 'Future Tech Blog', // 暂时注释掉未使用的参数
-  logo = '/vite.svg',
-  onThemeToggle,
-  isDarkMode = false
+  logo = '/vite.svg'
 }) => {
+  // 使用useTheme hook获取主题状态和切换方法
+  const { isDarkMode, toggleTheme: onThemeToggle } = useTheme();
   const { user } = useLogin();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -158,11 +157,17 @@ const Header: React.FC<HeaderProps> = ({
                 navigate(`/${i18n.language}/user/profile`);
               }}
             >
-              <img 
-                src={user.avatar || '/vite.svg'} 
-                alt={user.name || 'User'} 
-                className={styles.avatarImage}
-              />
+              {user.avatar ? (
+                <img 
+                  src={user.avatar} 
+                  alt={user.username || 'User'} 
+                  className={styles.avatarImage}
+                />
+              ) : (
+                <div className={styles.avatarPlaceholder}>
+                  {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                </div>
+              )}
             </div>
           ) : (
             <button 
@@ -204,7 +209,10 @@ const Header: React.FC<HeaderProps> = ({
                 type="checkbox" 
                 className={styles.switchInput}
                 checked={isDarkMode}
-                onChange={onThemeToggle}
+                onChange={(e) => {
+                e.stopPropagation();
+                onThemeToggle();
+              }}
               />
               <span 
                 className={`${styles.switchSlider} ${isDarkMode ? styles.darkMode : ''}`}
@@ -212,7 +220,7 @@ const Header: React.FC<HeaderProps> = ({
                 <span className={`${styles.sliderThumb} ${isDarkMode ? styles.darkMode : ''}`}></span>
               </span>
             </label>
-          )},
+          )}
           
           {/* 多语言菜单 */}
           <div 

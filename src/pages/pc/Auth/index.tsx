@@ -1,11 +1,16 @@
 "use client"
 
-import type React from "react"
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom"
 import { login } from "../../../services/auth"
-import type { LoginParams } from "../../../types/user"
+import { useTheme } from "../../../hooks/useTheme"
 import styles from "./styles.module.scss"
+
+// 登录参数接口
+interface LoginParams {
+  account: string;
+  password: string;
+}
 
 interface FormData {
   email: string
@@ -13,11 +18,9 @@ interface FormData {
 }
 
 const Auth: React.FC = () => {
-  // 当前页面暂时不使用翻译功能
   const navigate = useNavigate()
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const { isDarkMode, toggleTheme } = useTheme()
   const [isAnimating, setIsAnimating] = useState(false)
-  const [targetTheme, setTargetTheme] = useState<"dark" | "light" | null>(null)
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -26,28 +29,11 @@ const Auth: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
-  // 获取当前主题
+  // 使用useTheme钩子后不需要手动管理主题状态
   useEffect(() => {
-    const currentTheme =
-      localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-    setIsDarkMode(currentTheme === "dark")
-
-    // 监听主题变化
-    const handleThemeChange = () => {
-      const themeProvider = document.getElementById("theme-provider")
-      if (themeProvider) {
-        setIsDarkMode(themeProvider.getAttribute("data-theme") === "dark")
-      }
-    }
-
-    window.addEventListener("storage", (e) => {
-      if (e.key === "theme") {
-        setIsDarkMode(e.newValue === "dark")
-      }
-    })
-
+    // 主题管理已由useTheme钩子处理
     return () => {
-      window.removeEventListener("storage", handleThemeChange)
+      // 清理函数
     }
   }, [])
 
@@ -142,28 +128,21 @@ const Auth: React.FC = () => {
     // 如果动画正在进行中，不执行任何操作
     if (isAnimating) return;
 
-    // 计算目标主题
-    const newTheme = isDarkMode ? "light" : "dark"
-
-    // 立即设置目标主题和动画状态
-    setTargetTheme(newTheme)
     setIsAnimating(true)
 
-    // 在扩散动画进行到一半时切换实际背景
+    // 使用toggleTheme方法切换主题
     setTimeout(() => {
-      setIsDarkMode(newTheme === "dark")
-      localStorage.setItem("theme", newTheme)
+      toggleTheme()
     }, 400)
 
     // 动画结束后重置状态
     setTimeout(() => {
       setIsAnimating(false)
-      setTargetTheme(null)
     }, 1000)
   }
 
   const themeClass = isDarkMode ? styles["dark-mode"] : styles["light-mode"]
-  const overlayClass = targetTheme === "dark" ? styles["to-dark"] : targetTheme === "light" ? styles["to-light"] : ""
+  const overlayClass = ""
 
   return (
     <div className={`${styles["auth-container"]} ${themeClass}`}>

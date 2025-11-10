@@ -5,6 +5,8 @@ import './i18n';
 
 // 导入登录提供器
 import { LoginProvider } from '../hooks/useLogin';
+// 导入主题提供器
+import { ThemeProvider } from '../hooks/useTheme';
 
 
 interface ProvidersProps {
@@ -14,10 +16,11 @@ interface ProvidersProps {
 const Providers: React.FC<ProvidersProps> = ({ children }) => {
   // 已经通过导入i18n.ts自动初始化了i18n
   return (
-    <LoginProvider>
-      {children}
-    </LoginProvider>
-
+    <ThemeProvider>
+      <LoginProvider>
+        {children}
+      </LoginProvider>
+    </ThemeProvider>
   );
 };
 

@@ -47,6 +47,29 @@
   color: #4ade80;
 }
 
+/* 邮箱显示区域 */
+.email-display {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 12px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #3b82f6;
+}
+
+/* 深色模式下的邮箱显示 */
+.auth-container.dark-mode .email-display {
+  background: rgba(59, 130, 246, 0.05);
+  color: #60a5fa;
+}
+
+.email-display strong {
+  font-weight: 600;
+  margin-left: 4px;
+}
+
 /* 深色模式样式 - 作为 auth-container 的修饰类 */
 .auth-container.dark-mode {
   background: linear-gradient(135deg, #1a202c, #2d3748);

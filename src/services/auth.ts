@@ -1,14 +1,12 @@
 // 认证相关服务
 import apiClient from './apiClient';
-import type {
-  LoginParams,
-  RegisterParams,
-  SendCodeParams,
-  ResetPasswordParams,
-  AuthResponse,
-  ApiResponse,
-  User
-} from '../types/user';
+import type { User } from '../types/model/user';
+import type { LoginParams } from '../types/request/login';
+import type { RegisterParams } from '../types/request/register';
+import type { SendCodeParams } from '../types/request/sendCode';
+import type { ResetPasswordParams } from '../types/request/resetPassword';
+import type { ApiResponse } from '../types/response/common';
+import type { AuthResponse } from '../types/response/auth';
 
 /**
  * 发送验证码

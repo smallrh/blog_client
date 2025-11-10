@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { sendVerificationCode } from "../../../services/auth"
-import type { SendCodeParams } from "../../../types/user"
+import type { SendCodeParams } from "../../../types/request/sendCode"
 import styles from "./styles.module.scss"
 
 interface FormData {
@@ -105,10 +105,13 @@ const ForgetPass: React.FC = () => {
         console.log("密码重置验证码已发送到", formData.email)
         setSuccessMessage("Password reset instructions have been sent to your email.")
         
-        // 5秒后返回登录页面
+        // 5秒后导航到重置密码页面，并传递邮箱参数
         setTimeout(() => {
-          navigate(`/${currentLang}/auth/login`)
-        }, 5000)
+          navigate({
+            pathname: `/${currentLang}/auth/reset_password`,
+            search: `?email=${encodeURIComponent(formData.email)}`
+          })
+        }, 500)
       } else {
         // 显示错误信息
         setErrors({ email: response.message || "发送密码重置邮件失败" })

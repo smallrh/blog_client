@@ -14,7 +14,8 @@ i18n
   .init({
     // 默认语言设置为中文
     fallbackLng: 'zh',
-    lng: localStorage.getItem('i18nextLng') || 'zh',
+    // 移除直接从localStorage读取，让detector处理
+    lng: undefined,
     debug: import.meta.env.DEV,
     // 路径参数解析 - 简化配置，让路由组件处理语言切换
     detection: {
@@ -26,6 +27,8 @@ i18n
     backend: {
       // 翻译文件路径
       loadPath: '/locales/{{lng}}/translation.json',
+      // 确保路径正确解析
+      parse: (data: string) => JSON.parse(data),
     },
     interpolation: {
       escapeValue: false, // React已经默认转义了

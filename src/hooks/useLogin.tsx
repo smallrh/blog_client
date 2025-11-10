@@ -1,15 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import apiClient from '../services/apiClient';
+import type { User } from '../types/model/user';
 
-// 用户信息接口定义
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  avatar: string;
-  created_at?: string;
-}
 
 // 登录上下文接口
 interface LoginContextType {
@@ -38,7 +31,10 @@ export const LoginProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     
     if (savedToken && savedUser) {
       setToken(savedToken);
-      setUser(JSON.parse(savedUser));
+      const userData = JSON.parse(savedUser);
+      // 确保userData有username属性
+      const userWithUsername = userData.username ? userData : { ...userData, username: userData.name || 'User' };
+      setUser(userWithUsername);
       // 设置API客户端的认证token
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
     }
@@ -56,9 +52,11 @@ export const LoginProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       
       // 保存到状态和本地存储
       setToken(newToken);
-      setUser(userData);
+      // 确保userData有username属性，可能需要兼容处理
+      const userWithUsername = userData.username ? userData : { ...userData, username: userData.name || 'User' };
+      setUser(userWithUsername);
       localStorage.setItem('auth_token', newToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('user', JSON.stringify(userWithUsername));
       
       // 设置API客户端的认证token
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
@@ -94,7 +92,7 @@ export const LoginProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       setIsLoading(true);
       const response = await apiClient.post('/api/frontend/auth/register', {
-        name,
+        username: name, // 使用name作为username
         email,
         password,
         verify_code
@@ -104,9 +102,11 @@ export const LoginProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       
       // 保存到状态和本地存储
       setToken(newToken);
-      setUser(userData);
+      // 确保userData有username属性
+      const userWithUsername = userData.username ? userData : { ...userData, username: userData.name || name || 'User' };
+      setUser(userWithUsername);
       localStorage.setItem('auth_token', newToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('user', JSON.stringify(userWithUsername));
       
       // 设置API客户端的认证token
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
@@ -126,8 +126,10 @@ export const LoginProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setIsLoading(true);
       const response = await apiClient.get('/api/frontend/auth/me');
       const userData = response.data.data.user;
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      // 确保userData有username属性
+      const userWithUsername = userData.username ? userData : { ...userData, username: userData.name || 'User' };
+      setUser(userWithUsername);
+      localStorage.setItem('user', JSON.stringify(userWithUsername));
     } catch (error) {
       console.error('Auth check failed, clearing session:', error);
       // 认证失败，清除会话

@@ -4,8 +4,10 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { register, sendVerificationCode } from "../../../services/auth"
-import type { RegisterParams, SendCodeParams } from "../../../types/user"
+import { useTheme } from "../../../hooks/useTheme"
 import styles from "./styles.module.scss"
+import type { RegisterParams } from "../../../types/request/register"
+import type { SendCodeParams } from "../../../types/request/sendCode"
 
 interface FormData {
   username: string
@@ -19,9 +21,8 @@ const SignUp: React.FC = () => {
   const navigate = useNavigate()
   const params = useParams<{ lang: string }>()
   const currentLang = params.lang || 'en'
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const { isDarkMode, toggleTheme } = useTheme()
   const [isAnimating, setIsAnimating] = useState(false)
-  const [targetTheme, setTargetTheme] = useState<"dark" | "light" | null>(null)
   const [formData, setFormData] = useState<FormData>({
     username: "",
     email: "",
@@ -34,29 +35,9 @@ const SignUp: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
-  // 获取当前主题
+  // 获取当前主题 - 使用useTheme钩子后不需要手动设置和监听主题变化
   useEffect(() => {
-    const currentTheme = 
-      localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-    setIsDarkMode(currentTheme === "dark")
-
-    // 监听主题变化
-    const handleThemeChange = () => {
-      const themeProvider = document.getElementById("theme-provider")
-      if (themeProvider) {
-        setIsDarkMode(themeProvider.getAttribute("data-theme") === "dark")
-      }
-    }
-
-    window.addEventListener("storage", (e) => {
-      if (e.key === "theme") {
-        setIsDarkMode(e.newValue === "dark")
-      }
-    })
-
-    return () => {
-      window.removeEventListener("storage", handleThemeChange)
-    }
+    // 主题管理已由useTheme钩子处理
   }, [])
 
   // 表单输入处理
@@ -197,32 +178,23 @@ const SignUp: React.FC = () => {
     navigate(`/${currentLang}/auth/login`)
   }
 
+  // toggleTheme方法将在handleThemeToggle中直接使用
+  
   const handleThemeToggle = () => {
-    // 如果动画正在进行中，不执行任何操作
-    if (isAnimating) return;
-
-    // 计算目标主题
-    const newTheme = isDarkMode ? "light" : "dark"
-
-    // 立即设置目标主题和动画状态
-    setTargetTheme(newTheme)
-    setIsAnimating(true)
-
-    // 在扩散动画进行到一半时切换实际背景
-    setTimeout(() => {
-      setIsDarkMode(newTheme === "dark")
-      localStorage.setItem("theme", newTheme)
-    }, 400)
-
-    // 动画结束后重置状态
-    setTimeout(() => {
-      setIsAnimating(false)
-      setTargetTheme(null)
-    }, 1000)
-  }
+      // 如果动画正在进行中，不执行任何操作
+      if (isAnimating) return;
+      
+      setIsAnimating(true)
+      toggleTheme()
+      
+      // 动画结束后重置状态
+      setTimeout(() => {
+        setIsAnimating(false)
+      }, 1000)
+    }
 
   const themeClass = isDarkMode ? styles["dark-mode"] : styles["light-mode"]
-  const overlayClass = targetTheme === "dark" ? styles["to-dark"] : targetTheme === "light" ? styles["to-light"] : ""
+  const overlayClass = ""
 
   return (
     <div className={`${styles["auth-container"]} ${themeClass}`}>

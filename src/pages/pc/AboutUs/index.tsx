@@ -1,26 +1,19 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../../../hooks/useTheme';
+import styles from './styles.module.scss';
 
 const AboutUs: React.FC = () => {
   const { t } = useTranslation();
+  useTheme();
   
   return (
-    <div className="about-us-container" style={{
-      backgroundColor: 'white',
-      color: 'black',
-      padding: '40px',
-      border: '2px solid blue',
-      margin: '20px'
-    }}>
-      <h1 style={{ fontSize: '36px', color: 'blue' }}>{t('about.title')}</h1>
-      <p style={{ fontSize: '18px', marginTop: '20px' }}>
+    <div className={styles.container}>
+      <h1 className={styles.title}>{t('about.title')}</h1>
+      <p className={styles.description}>
         {t('about.description')}
       </p>
-      <div style={{
-        backgroundColor: 'lightblue',
-        padding: '20px',
-        marginTop: '20px'
-      }}>
+      <div className={styles.developing}>
         {t('about.developing')}
       </div>
     </div>
