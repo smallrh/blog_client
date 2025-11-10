@@ -103,14 +103,32 @@
 }
 
 .tabsBackground {
-  position: absolute;
-  height: calc(100% - 8px);
-  width: 100px;
-  border-radius: 8px;
-  background-color: rgba(0, 188, 212, 0.3);
-  transition: transform 0.3s ease-out;
-  z-index: 0;
-}
+    position: absolute;
+    height: calc(100% - 8px);
+    width: 100px;
+    border-radius: 8px;
+    background-color: rgba(0, 188, 212, 0.3);
+    left: 0;
+    top: 4px;
+    z-index: 0;
+  }
+  
+  // 使用JavaScript控制的滑块位置类
+  .tabsBackground.tab1 {
+    transform: translateX(0);
+  }
+  
+  .tabsBackground.tab2 {
+    transform: translateX(100px);
+  }
+  
+  .tabsBackground.tab3 {
+    transform: translateX(200px);
+  }
+  
+  .tabsBackground.tab4 {
+    transform: translateX(300px);
+  }
 
 .tabInput {
   position: absolute;

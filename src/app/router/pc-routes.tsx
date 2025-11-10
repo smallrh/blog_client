@@ -1,7 +1,9 @@
 import React from 'react';
 import { createBrowserRouter, useParams, useNavigate } from 'react-router-dom';
 import Home from '../../pages/pc/Home';
-import AboutUs from '../../pages/pc/AboutUs';
+import AboutUs from '../../pages/pc/About';
+import Posts from '../../pages/pc/Posts';
+import Categories from '../../pages/pc/Categories';
 import Login from '../../pages/pc/Auth/login';
 import ForgetPass from '../../pages/pc/Auth/forget_pass';
 import SignUp from '../../pages/pc/Auth/sign_up';
@@ -79,21 +81,14 @@ const routes = [
     path: '/:lang',
     element: <LanguageRoute><Home /></LanguageRoute>,
   },
-  {
-    path: '/:lang/pc',
-    element: <LanguageRoute><Home /></LanguageRoute>,
+  { path: '/:lang/posts',
+    element: <LanguageRoute><Posts /></LanguageRoute>,
   },
-  {
-    path: '/pc',
-    element: <LanguageRedirector />, // 不带语言参数的pc路径也重定向
+  { path: '/:lang/categories',
+    element: <LanguageRoute><Categories /></LanguageRoute>,
   },
-  {
-    path: '/:lang/about',
+  { path: '/:lang/about',
     element: <LanguageRoute><AboutUs /></LanguageRoute>,
-  },
-  {
-    path: '/about',
-    element: <LanguageRedirector />, // 不带语言参数的about路径也重定向
   },
   {
     path: '/:lang/auth',
@@ -113,48 +108,22 @@ const routes = [
   { path: '/:lang/auth/reset_password',
     element: <LanguageRoute><ResetPassword /></LanguageRoute>,
   },
-  {
-    path: '/:lang/pc/auth',
-    element: <LanguageRoute><Login /></LanguageRoute>,
-  },
-  {
-    path: '/:lang/pc/auth/login',
-    element: <LanguageRoute><Login /></LanguageRoute>,
-  },
-  {
-    path: '/:lang/pc/auth/forget_pass',
-    element: <LanguageRoute><ForgetPass /></LanguageRoute>,
-  },
-  { path: '/:lang/pc/auth/sign_up',
-    element: <LanguageRoute><SignUp /></LanguageRoute>,
-  },
-  { path: '/:lang/pc/auth/reset_password',
-    element: <LanguageRoute><ResetPassword /></LanguageRoute>,
-  },
-  { path: '/pc/auth',
-    element: <LanguageRedirector />, // 不带语言参数的auth路径重定向
-  },
+
   { path: '/auth',
     element: <LanguageRedirector />, // 不带语言参数的auth路径也重定向
   },
   // 直接的404页面路由
-  { path: '/:lang/pc/404',
-    element: <LanguageRoute><NotFound /></LanguageRoute>,
-  },
+
   { path: '/:lang/404',
     element: <LanguageRoute><NotFound /></LanguageRoute>,
   },
   // 错误处理路由 - 带语言前缀
-  { path: '/:lang/pc/error',
-    element: <LanguageRoute><Error /></LanguageRoute>,
-  },
+
   { path: '/:lang/error',
     element: <LanguageRoute><Error /></LanguageRoute>,
   },
   // 捕获所有带语言前缀的未匹配路由 - 放在最后作为兜底
-  { path: '/:lang/pc/*',
-    element: <LanguageRoute><NotFound /></LanguageRoute>,
-  },
+
   { path: '/:lang/*',
     element: <LanguageRoute><NotFound /></LanguageRoute>,
   },

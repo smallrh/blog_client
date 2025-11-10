@@ -1,0 +1,287 @@
+.posts-container {
+  min-height: 100vh;
+  padding-top: 80px; // 为fixed header留出空间
+  background-color: #1a1a1a; // 默认深色背景
+  
+  &.dark-mode {
+    background-color: #1a1a1a;
+  }
+  
+  &.light-mode {
+    background-color: #f0f0f0;
+  }
+}
+
+.main-content {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+}
+
+.page-header {
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid;
+  margin-bottom: 30px;
+
+  &.dark-mode {
+    background-color: rgba(30, 36, 44, 0.5);
+    border-color: rgba(95, 158, 160, 0.3);
+  }
+
+  &.light-mode {
+    background-color: #ffffff;
+    border-color: #e1e4e8;
+  }
+}
+
+.page-title {
+  color: #00bcd4;
+  font-size: 36px;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.page-description {
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  
+  &.dark-mode {
+    color: #cccccc;
+  }
+  
+  &.light-mode {
+    color: #666666;
+  }
+}
+
+// 文章列表区域
+.posts-section {
+  margin-bottom: 40px;
+  
+  &.dark-mode {
+    background-color: rgba(30, 36, 44, 0.5);
+  }
+  
+  &.light-mode {
+    background-color: #ffffff;
+  }
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post-item {
+  display: flex;
+  padding: 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.dark-mode {
+    background-color: rgba(48, 54, 61, 0.3);
+    border-color: rgba(95, 158, 160, 0.2);
+    
+    &:hover {
+      background-color: rgba(48, 54, 61, 0.5);
+    }
+  }
+  
+  &.light-mode {
+    background-color: #ffffff;
+    border-color: #e1e4e8;
+    
+    &:hover {
+      background-color: #f8f9fa;
+    }
+  }
+}
+
+.post-cover {
+  width: 160px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.post-content {
+  flex: 1;
+  min-width: 0; // 防止内容溢出
+}
+
+.post-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  
+  &.dark-mode {
+    color: #ffffff;
+  }
+  
+  &.light-mode {
+    color: #333333;
+  }
+}
+
+.post-excerpt {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  
+  &.dark-mode {
+    color: #cccccc;
+  }
+  
+  &.light-mode {
+    color: #666666;
+  }
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.post-date,
+.post-views {
+  font-size: 12px;
+  
+  &.dark-mode {
+    color: #999999;
+  }
+  
+  &.light-mode {
+    color: #999999;
+  }
+}
+
+// 加载更多按钮
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.load-more-button {
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  &.dark-mode {
+    background-color: transparent;
+    color: #00bcd4;
+    border: 2px solid #00bcd4;
+    
+    &:hover:not(:disabled) {
+      background-color: rgba(0, 188, 212, 0.1);
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+  
+  &.light-mode {
+    background-color: transparent;
+    color: #0d6efd;
+    border: 2px solid #0d6efd;
+    
+    &:hover:not(:disabled) {
+      background-color: rgba(13, 110, 253, 0.05);
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// 没有更多数据提示
+.no-more-data {
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  
+  &.dark-mode {
+    color: #999999;
+  }
+  
+  &.light-mode {
+    color: #999999;
+  }
+}
+
+// 空状态
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  border-radius: 12px;
+  border: 1px dashed;
+  
+  &.dark-mode {
+    border-color: rgba(95, 158, 160, 0.3);
+    color: #cccccc;
+  }
+  
+  &.light-mode {
+    border-color: #e1e4e8;
+    color: #999999;
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px;
+  }
+  
+  .page-header {
+    padding: 20px;
+  }
+  
+  .page-title {
+    font-size: 28px;
+  }
+  
+  .post-item {
+    flex-direction: column;
+  }
+  
+  .post-cover {
+    width: 100%;
+    height: 200px;
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  .post-title {
+    font-size: 18px;
+  }
+}

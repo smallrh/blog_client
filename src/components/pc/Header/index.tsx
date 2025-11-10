@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLogin } from '../../../hooks/useLogin';
 import { useTheme } from '../../../hooks/useTheme';
 import styles from './styles.module.scss';
@@ -26,8 +26,9 @@ const Header: React.FC<HeaderProps> = ({
   
   // 使用i18n
   const { t, i18n } = useTranslation();
-  // 使用导航
+  // 使用导航和位置
   const navigate = useNavigate();
+  const location = useLocation();
   
   // 语言选项
   const languages = [
@@ -67,22 +68,63 @@ const Header: React.FC<HeaderProps> = ({
     };
   }, []);
   
+  // 监听路由变化，自动更新activeTab
+  useEffect(() => {
+    const path = location.pathname;
+    const currentLang = i18n.language;
+    const cleanPath = path.replace(`/${currentLang}`, '').replace('/pc', '');
+    
+    let activeTabId = 'tab1'; // 默认首页
+    if (cleanPath.includes('/posts')) {
+      activeTabId = 'tab2';
+    } else if (cleanPath.includes('/categories')) {
+      activeTabId = 'tab3';
+    } else if (cleanPath.includes('/about')) {
+      activeTabId = 'tab4';
+    }
+    
+    if (activeTab !== activeTabId) {
+      setActiveTab(activeTabId);
+    }
+  }, [location.pathname, i18n.language, activeTab]);
+  
   // 主题通过props传入，不再需要内部状态管理
 
   // 处理标签切换
   const handleTabChange = (tabId: string) => {
+    // 立即更新activeTab状态
     setActiveTab(tabId);
-    // 这里可以添加导航逻辑，比如滚动到对应部分或使用router跳转
-    const element = document.getElementById(tabId.replace('tab', ''));
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    
+    // 使用路由导航到对应的页面
+    const tab = tabs.find(t => t.id === tabId);
+    if (tab) {
+      // 根据目标页面确定正确的路由路径
+      let path = '/';
+      switch (tab.target) {
+        case 'home':
+          path = '/';
+          break;
+        case 'posts':
+          path = '/posts';
+          break;
+        case 'categories':
+          path = '/categories';
+          break;
+        case 'about':
+          path = '/about';
+          break;
+        default:
+          path = '/';
+      }
+      // 添加当前语言前缀
+      navigate(`/${i18n.language}${path}`);
     }
   };
 
   // 定义标签数据
   const tabs = [
     { id: 'tab1', label: t('header.tabs.0.label'), target: 'home' },
-    { id: 'tab2', label: t('header.tabs.1.label'), target: 'articles' },
+    { id: 'tab2', label: t('header.tabs.1.label'), target: 'posts' },
     { id: 'tab3', label: t('header.tabs.2.label'), target: 'categories' },
     { id: 'tab4', label: t('header.tabs.4.label'), target: 'about' },
   ];
@@ -111,11 +153,8 @@ const Header: React.FC<HeaderProps> = ({
         {/* 选项卡导航 - 桌面端 */}
         {showNav && (
           <div className={styles.tabsContainer}>
-            {/* 背景滑动条 - 修复定位计算 */}
-            <div 
-              className={styles.tabsBackground}
-              style={{ transform: `translateX(${tabs.findIndex(tab => tab.id === activeTab) * 100}px)` }}
-            />
+            {/* 滑块样式 - 根据activeTab动态添加类 */}
+            <div className={`${styles.tabsBackground} ${styles[activeTab]}`} />
             
             {/* 移除上下装饰条，简化设计 */}
 
